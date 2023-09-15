@@ -241,10 +241,6 @@
       fi
       export ORT_CLI_ANALYZE_ARGS ORT_CLI_EVALUATE_ARGS ORT_CLI_REPORT_ARGS
 
-    # Print global configuration used by ORT
-    - |
-      ${ORT_CLI} config --show-active
-
     # Execute ORT's Downloader to fetch the source code for the project to be scanned.
     - |
       if [[ "$PROJECT_PATH" = "$CI_PROJECT_DIR" ]]
@@ -270,12 +266,6 @@
           && echo -e "\e[1;31m Unable to retrieve project sources from ${VCS_URL}." \
           && exit 1
         fi
-
-      ls -all $PROJECT_PATH
-
-    - printenv >> vars.env
-
-    #- echo "[DEBUG] env vars"; env
 
     - |
       echo -e "\e[1;33m Running ORT Analyzer... "
