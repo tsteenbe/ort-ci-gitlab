@@ -407,9 +407,6 @@
       fi
   timeout: 20 hours
   after_script:
-    # Read variables from file passed from 'script' as they are not available in 'after_script' by default.
-    # - if [[ -f vars.env ]]; then source vars.env; fi
-
     # Workaround for maven cache.
     - |
       if [[ -d "${HOME}/.m2/repository/" ]]; then
@@ -424,5 +421,4 @@
         mv ${GOPATH}/pkg/mod/* ${GO_CACHE_LOCAL}
       fi
 
-    - ls -all $ORT_RESULTS_PATH
     - export ORT_SCAN_FINISHED_AT=$(date +"%Y-%m-%dT%H:%M:%S%z")
