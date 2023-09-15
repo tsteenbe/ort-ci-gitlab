@@ -112,7 +112,7 @@
       export PROJECT_VCS_REPOSITORY_NAME=$(echo $PROJECT_VCS_URL | sed -E 's/.*\/(.*)\.git/\1/')
       export SW_NAME=${SW_NAME:-"$PROJECT_VCS_REPOSITORY_NAME"}
       # Remove all special characters and whitespace from software name as some tools cannot handle them.
-      export SW_NAME_SAFE=$(echo ${SW_NAME} | sed -e 's/[^A-Za-z0-9 \-\_]//g' -e 's/\s/-/g' -e 's/\([A-Z]\)/\L\1/g')
+      export SW_NAME_SAFE=$(echo ${SW_NAME} | sed -e 's/\s/-/g' -e 's/[^[:alnum:]_-]//g' -e 's/--/-/g' -e 's/\([A-Z]\)/\L\1/g')
       export SW_VERSION=${SW_VERSION:-"${VCS_REVISION:0:7}"}
 
     # Creating required directories within user home directory.
@@ -230,7 +230,7 @@
         [[ -n "${ORT_ALLOW_DYNAMIC_VERSIONS}" ]] && ORT_CLI_ANALYZE_ARGS="-l allow-dynamic-versions=${ORT_ALLOW_DYNAMIC_VERSIONS} ${ORT_CLI_ANALYZE_ARGS}"
         [[ -n "${ORT_CONFIG_VCS_REVISION}" ]] && ORT_CLI_ANALYZE_ARGS="-l ort-config-revision=${ORT_CONFIG_VCS_REVISION} ${ORT_CLI_ANALYZE_ARGS}"
         [[ -n "${ORT_CONFIG_VCS_URL}" ]] && ORT_CLI_ANALYZE_ARGS="-l ort-config-repository=${ORT_CONFIG_VCS_URL} ${ORT_CLI_ANALYZE_ARGS}"
-        ORT_CLI_ANALYZE_ARGS="-l sw-version=${SW_VERSION} -l sw-name=\"${SW_NAME}\" ${ORT_CLI_ANALYZE_ARGS}"
+        ORT_CLI_ANALYZE_ARGS="-l sw-version=${SW_VERSION} -l sw-name=${SW_NAME_SAFE}" ${ORT_CLI_ANALYZE_ARGS}"
       fi
 
     # Include repository configuration file (.ort.yml) if found in ORT CLI parameters.
