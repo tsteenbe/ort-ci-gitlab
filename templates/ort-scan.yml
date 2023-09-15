@@ -388,18 +388,20 @@
         [[ ${ORT_CLI_REPORT_CODE} -eq 1 ]] && exit 1
       fi
     
-    # Remove current-result.json wh
+    # Remove job internal use only current-result.json from scan results directory 
     - |
       [[ -f ${ORT_RESULTS_CURRENT_PATH} ]] \
         && rm $ORT_RESULTS_CURRENT_PATH \
         && unset $ORT_RESULTS_CURRENT_PATH
 
+    # Fail job on policy violations if FAIL_ON variable contains 'violations'.
     - |
       if [[ ${FAIL_ON} == *"violations"* && ORT_CLI_EVALUATE_EXIT_CODE -eq 2 ]]; then
         echo -e "\e[1;31m Failing action as Evaluator exceeded severity threshold... "
         exit 2
       fi
 
+    # Fail job on security issues if FAIL_ON variable contains 'issues'.
     - |
       if [[ ${FAIL_ON} == *"issues"* && ORT_CLI_ADVISE_EXIT_CODE -eq 2 ]]; then
         echo -e "\e[1;31m Failing action as Advisor exceeded severity threshold... "
