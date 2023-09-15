@@ -68,6 +68,7 @@ ort-scan:
 - [Run ORT with labels](#Run-ORT-with-labels)
 - [Run ORT and fail job on policy violations or security issues](#Run-ORT-and-fail-job-on-policy-violations-or-security-issues)
 - [Run ORT on private repositories](#Run-ORT-on-private-repositories)
+- [Run ORT on multiple repositories using a matrix](#Run-ORT-on-multiple-repositories-using-a-matrix)
 - [Run ORT with a custom global configuration](#Run-ORT-with-a-custom-global-configuration)
 - [Run ORT with a custom Docker image](#Run-ORT-with-a-custom-Docker-image)
 - [Run ORT with PostgreSQL database](#Run-ORT-with-PostgreSQL-database)
@@ -202,17 +203,25 @@ ort-scan:
     # Add SSH private key and generate SSH configuration file
     # Based on https://gitlab.com/gitlab-examples/ssh-private-key
     - |
-    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-    - eval $(ssh-agent -s)
-    - ssh-add <(echo "$SSH_PRIVATE_KEY" | base64 --decode)
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+      'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+      eval $(ssh-agent -s)
+      ssh-add <(echo "$SSH_PRIVATE_KEY" | base64 --decode)
+      mkdir -p ~/.ssh
+      chmod 700 ~/.ssh
+      echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
   artifacts:
     when: always
     paths:
       - $ORT_RESULTS_PATH
 ```
+
+Instead of using SSH agent you can also do the following:
+
+```yaml
+
+```
+
+
 
 ```yaml
 include:
@@ -248,6 +257,46 @@ ort-scan:
     paths:
       - $ORT_RESULTS_PATH
 ```
+
+#### Run ORT on multiple repositories using a matrix
+
+```yaml
+include:
+  - https://raw.githubusercontent.com/tsteenbe/ort-ci-gitlab/main/templates/ort-scan.yml
+
+image: node:latest
+
+stages:
+  - test
+
+ort-scan:
+  stage: test
+  extends: .ort-scan
+  retry: 2
+  parallel:
+    matrix:
+      - SW_NAME: 'Mime Types'
+        SW_VERSION: '2.1.35'
+        VCS_URL: "https://github.com/jshttp/mime-types.git"
+        VCS_REVISION: "ef932231c20e716ec27ea159c082322c3c485b66"
+      - SW_NAME: 'Async'
+        SW_VERSION: '2.3.0'
+        VCS_URL: "https://github.com/caolan/async.git"
+        VCS_REVISION: "fba005b6b37973ffb080d91852a983d618438897"
+  variables:
+    RUN: >
+      labels,
+      analyzer,
+      reporter
+  before_script:
+    # Use HTTPS instead of SSH for Git cloning
+    - git config --global url.https://github.com/.insteadOf ssh://git@github.com/
+  artifacts:
+    when: always
+    paths:
+      - $ORT_RESULTS_PATH
+```
+
 
 ### Run ORT with a custom global configuration
 
