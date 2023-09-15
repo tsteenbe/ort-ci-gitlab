@@ -29,10 +29,10 @@
   script:
     - export ORT_SCAN_STARTED_AT=$(date +"%Y-%m-%dT%H:%M:%S%z")
 
-    # Set safe directory to resolve Git 'fatal: detected dubious ownership in repository' error message
+    # Set safe directory to resolve Git 'fatal: detected dubious ownership in repository' error message.
     - git config --global safe.directory '*'
 
-    # GITLAB_USER_NAME is UPPERCASED in order to unmask it in GitLab logs
+    # GITLAB_USER_NAME is UPPERCASED in order to unmask it in GitLab logs.
     - export TRIGGERER=${UPSTREAM_PIPELINE_URL:-"${GITLAB_USER_NAME^^} manually"}
     - echo "Started by $TRIGGERER"
 
@@ -52,7 +52,7 @@
 
     - echo -e "\e[1;33m Initializing ORT in GitLab... "
 
-    # Setting default values for various variables
+    # Setting default values for various variables.
     - |  
       export ORT_DATA_PATH=${HOME}/${ORT_DATA_DIR_NAME:-".ort"}
       export DISABLE_SHALLOW_CLONE=${DISABLE_SHALLOW_CLONE:-"false"}
@@ -115,14 +115,14 @@
       export SW_NAME_SAFE=$(echo ${SW_NAME} | sed -e 's/[^A-Za-z0-9 \-\_]//g' -e 's/\s/-/g' -e 's/\([A-Z]\)/\L\1/g')
       export SW_VERSION=${SW_VERSION:-"${VCS_REVISION:0:7}"}
 
-    # Creating required directories within user home directory
+    # Creating required directories within user home directory.
     - |
       mkdir -p ${HOME}/.cache/scancode-tk/; chmod -R aug+w ${HOME}/.cache/ || :
       mkdir -p ${HOME}/.config/jgit/; chmod -R aug+w ${HOME}/.config/ || :
       mkdir -p ${ORT_DATA_PATH}/{cache,config,ort-results,scanner/archive/,scanner/provenance/}; chmod -R aug+w ${ORT_DATA_PATH}/ || :
       mkdir -p ${PROJECT_PATH}/; chmod -R aug+w ${PROJECT_PATH}/ || :
 
-    # Set up ORT configuration repository
+    # Set up ORT configuration repository.
     - |
       if [[ -z "$(ls -A ${ORT_CONFIG_PATH})" ]];  then
         ORT_CONFIG_VCS_REVISION=${ORT_CONFIG_VCS_REVISION:-$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')}
@@ -141,6 +141,8 @@
         && export ORT_CONFIG_VCS_REVISION=$(git rev-parse HEAD)      
       cd -
 
+    # Generate ORT global configuration if not found.
+    - |
       if [[ (! -z "${ORT_CONFIG_PATH}/config.yml") && (-n "${POSTGRES_URL}") ]]; then
       cat << EOF > ${ORT_CONFIG_PATH}/config.yml
       ort:
@@ -213,6 +215,8 @@
       EOF
       fi
     
+    # Generate labels to be passed as arguments to ORT Analyzer. 
+    # Labels can be used track scan related info or execute policy rules for specific product, delivery or organization.
     - |
       if [[ ${ORT_RUN_COMMANDS} == *"labels"* ]]; then
         echo -e "\e[1;33m Compute ORT labels... "
@@ -229,9 +233,8 @@
         ORT_CLI_ANALYZE_ARGS="-l sw-version=${SW_VERSION} -l sw-name='${SW_NAME}' ${ORT_CLI_ANALYZE_ARGS}"
       fi
 
+    # Include repository configuration file (.ort.yml) if found in ORT CLI parameters.
     - |
-      echo -e "\e[1;33m Compute ORT arguments... "
-
       if [[ -s "${ORT_YML_PATH}" ]]; then
         ORT_CLI_ANALYZE_ARGS="--repository-configuration-file ${ORT_YML_PATH} ${ORT_CLI_ANALYZE_ARGS}"
         ORT_CLI_EVALUATE_ARGS="--repository-configuration-file ${ORT_YML_PATH} ${ORT_CLI_EVALUATE_ARGS}"
@@ -239,9 +242,11 @@
       elif [[ ! -z "${ORT_YML_PATH}" ]]; then
         echo -e "\e[1;31m File ${ORT_YML_PATH} not found!."
       fi
+    
+    - |
       export ORT_CLI_ANALYZE_ARGS ORT_CLI_EVALUATE_ARGS ORT_CLI_REPORT_ARGS
 
-    # Execute ORT's Downloader to fetch the source code for the project to be scanned.
+    # Run ORT's Downloader to retrieve the source code for the project to be scanned.
     - |
       if [[ "$PROJECT_PATH" = "$CI_PROJECT_DIR" ]]
       then
@@ -266,7 +271,8 @@
           && echo -e "\e[1;31m Unable to retrieve project sources from ${VCS_URL}." \
           && exit 1
         fi
-
+  
+    # Run ORT's Analyzer to determine the dependencies used by the project and their metadata.
     - |
       echo -e "\e[1;33m Running ORT Analyzer... "
       ${ORT_CLI} \
@@ -288,6 +294,7 @@
       
       [[ ${ORT_CLI_ANALYZE_EXIT_CODE} -eq 1 ]] && exit 1
 
+    # Run ORT's Scanner to use configured source code scanners to detect license and copyright findings.
     - |
       if [[ ${ORT_RUN_COMMANDS} == *"scanner"* ]]; then
         echo -e "\e[1;33m Running ORT Scanner... "
@@ -311,6 +318,8 @@
         [[ ${ORT_CLI_SCANNER_EXIT_CODE} -eq 1 ]] && exit 1
       fi
 
+    # Run ORT's Evaluator to evaluate custom policy rules along with custom license classifications against the data gathered
+    # in preceding ORT stages and returns a list of policy violations (e.g. flags license or vulnerability findings).
     - |
       if [[ ${ORT_RUN_COMMANDS} == *"evaluator"* ]]; then
         echo -e "\e[1;33m Running ORT Evaluator... "
@@ -334,6 +343,7 @@
         [[ ${ORT_CLI_EVALUATE_EXIT_CODE} -eq 1 ]] && exit 1
       fi
 
+    # Run ORT's Advisor to retrieve security advisories for used dependencies from configured vulnerability data services.
     - |
       if [[ ${ORT_RUN_COMMANDS} == *"advisor"* ]]; then
         echo -e "\e[1;33m Running ORT Advisor... "
@@ -358,6 +368,8 @@
         [[ ${ORT_CLI_ADVISE_EXIT_CODE} -eq 1 ]] && exit 1
       fi
 
+    # Run ORT's Reporter to present scan results in various formats such as visual reports,
+    # Open Source notices or Software Bill-Of-Materials (SBOMs).
     - |
       if [[ ${ORT_RUN_COMMANDS} == *"reporter"* ]]; then
         echo -e "\e[1;33m Running ORT Reporter... "
