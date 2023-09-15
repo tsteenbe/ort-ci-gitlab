@@ -152,9 +152,9 @@ ort-scan:
   before_script:
     # Use HTTPS instead of SSH for Git cloning
     - git config --global url.https://github.com/.insteadOf ssh://git@github.com/
-  # rules:
-  #   - if: $CI_PIPELINE_SOURCE == 'pipeline' || $CI_PIPELINE_SOURCE == 'trigger'
-  #   - if: $CI_PIPELINE_SOURCE == 'web' && $VCS_URL && $VCS_REVISION
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'pipeline' || $CI_PIPELINE_SOURCE == 'trigger'
+    - if: $CI_PIPELINE_SOURCE == 'web' && $VCS_URL && $VCS_REVISION
   artifacts:
     when: always
     paths:
