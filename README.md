@@ -6,7 +6,7 @@ Run licensing, security and best practices checks and generate reports/SBOMs usi
 
 See [.gitlab-ci.yml](.gitlab-ci.yml)
 
-## Prerequisites
+### Prerequisites
 
 GitLab Commmunity or Enterprise Edition, version 15 or higher.
 
@@ -22,7 +22,6 @@ stages:
 ort-scan:
   stage: ort
   extends: .ort-scan
-  retry: 2
   artifacts:
     when: always
     paths:
@@ -41,7 +40,6 @@ stages:
 ort-scan:
   stage: ort
   extends: .ort-scan
-  retry: 2
   variables:
     SW_NAME: 'Mime Types'
     SW_VERSION: '2.1.35'
@@ -85,7 +83,6 @@ stages:
 ort-scan:
   stage: ort
   extends: .ort-scan
-  retry: 2
   variables:
     SW_NAME: 'Mime Types'
     SW_VERSION: '2.1.35'
@@ -116,7 +113,6 @@ stages:
 ort-scan:
   stage: ort
   extends: .ort-scan
-  retry: 2
   variables:
     SW_NAME: 'Mime Types'
     SW_VERSION: '2.1.35'
@@ -155,7 +151,6 @@ stages:
 ort-scan:
   stage: ort
   extends: .ort-scan
-  retry: 2
   variables:
     SW_NAME: 'Mime Types'
     SW_VERSION: '2.1.35'
@@ -183,13 +178,14 @@ To run ORT on private Git repositories, we recommend to:
 include:
   - https://raw.githubusercontent.com/tsteenbe/ort-ci-gitlab/main/templates/ort-scan.yml
 
+image: 'ubuntu:latest'
+
 stages:
   - ort
 
 ort-scan:
   stage: ort
   extends: .ort-scan
-  retry: 2
   variables:
     SW_NAME: 'Mime Types'
     SW_VERSION: '2.1.35'
@@ -224,7 +220,6 @@ stages:
 ort-scan:
   stage: ort
   extends: .ort-scan
-  retry: 2
   variables:
     SW_NAME: 'Mime Types'
     SW_VERSION: '2.1.35'
@@ -254,8 +249,8 @@ ort-scan:
 Use `ORT_CONFIG_REPOSITORY` to specify the location of your ORT global configuration repository.
 If `ORT_CONFIG_REVISION` is not automatically latest state of configuration repository will be used.
 
-Alternatively, you can also generate your ORT global configuration files in `~/.ort/config` 
-using `before_script`.
+Alternatively, you can also define your ORT global configuration files in `~/.ort/config` 
+using `before_script` within the `ort-scan` job.
 
 ```yaml
 include:
@@ -267,7 +262,6 @@ stages:
 ort-scan:
   stage: ort-scan
   extends: .ort-scan
-  retry: 2
   variables:
     SW_NAME: 'Mime Types'
     SW_VERSION: '2.1.35'
@@ -298,7 +292,6 @@ ort-scan:
   stage: ort
   image: 'example.com/my-org/ort-container:latest'
   extends: .ort-scan
-  retry: 2
   variables:
     SW_NAME: 'Mime Types'
     SW_VERSION: '2.1.35'
@@ -336,7 +329,6 @@ stages:
 ort-scan:
   stage: ort
   extends: .ort-scan
-  retry: 2
   variables:
     SW_NAME: 'Mime Types'
     SW_VERSION: '2.1.35'
@@ -368,7 +360,6 @@ stages:
 ort-scan:
   stage: ort
   extends: .ort-scan
-  retry: 2
   variables:
     SW_NAME: 'Mime Types'
     SW_VERSION: '2.1.35'
