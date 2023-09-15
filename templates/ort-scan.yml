@@ -230,7 +230,7 @@
         [[ -n "${ORT_ALLOW_DYNAMIC_VERSIONS}" ]] && ORT_CLI_ANALYZE_ARGS="-l allow-dynamic-versions=${ORT_ALLOW_DYNAMIC_VERSIONS} ${ORT_CLI_ANALYZE_ARGS}"
         [[ -n "${ORT_CONFIG_VCS_REVISION}" ]] && ORT_CLI_ANALYZE_ARGS="-l ort-config-revision=${ORT_CONFIG_VCS_REVISION} ${ORT_CLI_ANALYZE_ARGS}"
         [[ -n "${ORT_CONFIG_VCS_URL}" ]] && ORT_CLI_ANALYZE_ARGS="-l ort-config-repository=${ORT_CONFIG_VCS_URL} ${ORT_CLI_ANALYZE_ARGS}"
-        ORT_CLI_ANALYZE_ARGS="-l sw-version=${SW_VERSION} -l sw-name=${SW_NAME_SAFE}" ${ORT_CLI_ANALYZE_ARGS}"
+        ORT_CLI_ANALYZE_ARGS="-l sw-version=${SW_VERSION} -l sw-name=${SW_NAME_SAFE} ${ORT_CLI_ANALYZE_ARGS}"
       fi
 
     # Include repository configuration file (.ort.yml) if found in ORT CLI parameters.
